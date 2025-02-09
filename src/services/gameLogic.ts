@@ -1,4 +1,4 @@
-export type boardCell = string | null | undefined
+import { Cell } from "@/types"
 
 const winningConditions = [
     // line winning condition
@@ -46,7 +46,9 @@ const winningConditions = [
     ],
 ]
 
-export const verifyWinner = (board: boardCell[][]): string | undefined => {
+type GameState = 'GOING' | 'DRAW' | 'X_WIN' | 'O_WIN'
+
+export const verifyWinner = (board: Cell[][]): GameState | null => {
     for (let i = 0; i < winningConditions.length; i++) {
         const result = winningConditions[i]
             .map<number>((position) => {
@@ -57,18 +59,37 @@ export const verifyWinner = (board: boardCell[][]): string | undefined => {
                 return acc + val
             })
         if (result === 3) {
-            console.log(winningConditions[i])
-            return 'X'
+            return 'X_WIN'
         }
         if (result === -3) {
-            console.log(winningConditions[i])
-            return 'O'
+            return 'O_WIN'
         }
     }
-    return
+    return null
 }
 
-export const isGameCompleted = (board: boardCell[][]): boolean => {
-    const winner = verifyWinner(board)
-    return winner !== undefined
+export const isDraw = (board: Cell[][]): boolean => {
+    return board
+        .flatMap((row) =>
+            row.map((value) => {
+                if (value !== null) {
+                    return true
+                } else {
+                    return false
+                }
+            }),
+        )
+        .reduce((acc, value) => acc && value, true)
+}
+
+export const checkGameState = (board: Cell[][]): GameState => {
+    const possibleWinner = verifyWinner(board)
+    if (possibleWinner) {
+        return possibleWinner
+    }
+    if (isDraw(board)) {
+        return 'DRAW'
+    }
+
+    return 'GOING'
 }
